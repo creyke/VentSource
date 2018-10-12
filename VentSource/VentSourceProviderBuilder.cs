@@ -3,12 +3,12 @@
     public class VentSourceProviderBuilder
     {
         private readonly VentBuilder ventBuilder;
-        private readonly ISourceProvider sourceProvider;
+        private readonly SourceProviderHost sourceProviderHost;
 
-        public VentSourceProviderBuilder(VentBuilder ventBuilder, ISourceProvider sourceProvider)
+        public VentSourceProviderBuilder(VentBuilder ventBuilder, SourceProviderHost sourceProviderHost)
         {
             this.ventBuilder = ventBuilder;
-            this.sourceProvider = sourceProvider;
+            this.sourceProviderHost = sourceProviderHost;
         }
 
         public VentSourceProviderBuilder AddSource<TSourceType>()
@@ -18,6 +18,7 @@
 
         public VentSourceProviderBuilder AddSource<TSourceType>(string tableName)
         {
+            sourceProviderHost.AddSource(new Source<TSourceType>(tableName));
             return this;
         }
 

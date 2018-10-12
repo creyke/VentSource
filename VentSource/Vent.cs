@@ -5,18 +5,13 @@ namespace VentSource
 {
     public class Vent : IVent
     {
-        private List<ISourceProvider> sourceProviders;
+        private List<SourceProviderHost> sourceProviderHosts;
         private IWatermarkProvider watermarkProvider;
         private Watermark watermark;
 
         public Vent()
         {
-            sourceProviders = new List<ISourceProvider>();
-        }
-
-        public void AddSourceProvider(ISourceProvider sourceProvider)
-        {
-            sourceProviders.Add(sourceProvider);
+            sourceProviderHosts = new List<SourceProviderHost>();
         }
 
         public void SetWatermarkProvider(IWatermarkProvider watermarkProvider)
@@ -32,6 +27,11 @@ namespace VentSource
                 await Task.Delay(2 * 1000);
             }
             while (true);
+        }
+
+        public void AddSourceProviderHost(SourceProviderHost sourceProviderHost)
+        {
+            sourceProviderHosts.Add(sourceProviderHost);
         }
 
         private async Task LoopAsync()
@@ -53,15 +53,25 @@ namespace VentSource
 
         private async Task UpdateAsync()
         {
-            foreach (var sourceProvider in sourceProviders)
+            for (int i = 0; i < sourceProviderHosts.Count; i++)
             {
-                await UpdateProviderAsync(sourceProvider);
+                await UpdateProviderAsync(sourceProviderHosts[i], i);
             }
         }
 
-        private async Task UpdateProviderAsync(ISourceProvider sourceProvider)
+        private async Task UpdateProviderAsync(SourceProviderHost sourceProviderHost, int providerId)
         {
+            if (watermark.ProviderWatermarks == null)
+            {
+                watermark.ProviderWatermarks = new List<ProviderWatermark>();
+            }
 
+            if (watermark.ProviderWatermarks.Count <= providerId)
+            {
+                watermark.ProviderWatermarks.Add(new ProviderWatermark());
+            }
+
+            await sourceProviderHost.UpdateAsync(watermark.ProviderWatermarks[providerId]);
         }
 
         private async Task WriteWatermarkAsync()

@@ -19,8 +19,9 @@ namespace VentSource
 
         public VentSourceProviderBuilder AddSourceProvider(ISourceProvider sourceProvider)
         {
-            vent.AddSourceProvider(sourceProvider);
-            return new VentSourceProviderBuilder(this, sourceProvider);
+            var sourceProviderHost = new SourceProviderHost(sourceProvider);
+            vent.AddSourceProviderHost(sourceProviderHost);
+            return new VentSourceProviderBuilder(this, sourceProviderHost);
         }
 
         public VentTargetProviderBuilder AddTargetProvider(ITargetProvider targetProvider)
