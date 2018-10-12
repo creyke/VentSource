@@ -22,6 +22,7 @@ namespace VentSource
 
         public async Task UpdateAsync(ProviderWatermark providerWatermark)
         {
+            providerWatermark.Version = await sourceProvider.UpdateSourcesAsync(sources);
         }
     }
 }

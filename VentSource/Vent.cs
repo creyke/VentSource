@@ -7,7 +7,7 @@ namespace VentSource
     {
         private List<SourceProviderHost> sourceProviderHosts;
         private IWatermarkProvider watermarkProvider;
-        private Watermark watermark;
+        private Watermark currentWatermark;
 
         public Vent()
         {
@@ -21,6 +21,8 @@ namespace VentSource
 
         public async Task StreamAsync()
         {
+            await ReadWatermarkAsync();
+
             do
             {
                 await LoopAsync();
@@ -36,45 +38,47 @@ namespace VentSource
 
         private async Task LoopAsync()
         {
-            await ReadWatermarkAsync();
             await UpdateAsync();
-            await WriteWatermarkAsync();
         }
 
         private async Task ReadWatermarkAsync()
         {
-            if (watermark != null)
+            if (currentWatermark != null)
             {
                 return;
             }
 
-            watermark = await watermarkProvider.ReadAsync();
+            currentWatermark = await watermarkProvider.ReadAsync();
+
+            if (currentWatermark.ProviderWatermarks == null)
+            {
+                currentWatermark.ProviderWatermarks = new List<ProviderWatermark>();
+            }
+
+            while (currentWatermark.ProviderWatermarks.Count < sourceProviderHosts.Count)
+            {
+                currentWatermark.ProviderWatermarks.Add(new ProviderWatermark());
+            }
         }
 
         private async Task UpdateAsync()
         {
+            var watermark = currentWatermark.Clone();
+
             for (int i = 0; i < sourceProviderHosts.Count; i++)
             {
-                await UpdateProviderAsync(sourceProviderHosts[i], i);
+                await UpdateProviderAsync(sourceProviderHosts[i], i, watermark);
             }
+
+            await WriteWatermarkAsync(watermark);
         }
 
-        private async Task UpdateProviderAsync(SourceProviderHost sourceProviderHost, int providerId)
+        private async Task UpdateProviderAsync(SourceProviderHost sourceProviderHost, int providerId, Watermark nextWatermark)
         {
-            if (watermark.ProviderWatermarks == null)
-            {
-                watermark.ProviderWatermarks = new List<ProviderWatermark>();
-            }
-
-            if (watermark.ProviderWatermarks.Count <= providerId)
-            {
-                watermark.ProviderWatermarks.Add(new ProviderWatermark());
-            }
-
-            await sourceProviderHost.UpdateAsync(watermark.ProviderWatermarks[providerId]);
+            await sourceProviderHost.UpdateAsync(nextWatermark.ProviderWatermarks[providerId]);
         }
 
-        private async Task WriteWatermarkAsync()
+        private async Task WriteWatermarkAsync(Watermark watermark)
         {
             await watermarkProvider.WriteAsync(watermark);
         }

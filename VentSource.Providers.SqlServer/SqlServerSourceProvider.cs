@@ -1,4 +1,7 @@
-﻿namespace VentSource.Providers.SqlServer
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace VentSource.Providers.SqlServer
 {
     public class SqlServerSourceProvider : ISourceProvider
     {
@@ -7,6 +10,11 @@
         public SqlServerSourceProvider(string connectionString)
         {
             this.connectionString = connectionString;
+        }
+
+        public async Task<long> UpdateSourcesAsync(List<Source> sources)
+        {
+            return 0;
         }
     }
 }
