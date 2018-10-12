@@ -11,19 +11,26 @@ namespace VentSource
             vent = new Vent();
         }
 
-        public VentSourceProviderBuilder AddSourceProvider(ISourceProvider sourceProvider)
+        public VentBuilder SetWatermarkProvider(IWatermarkProvider watermarkProvider)
         {
-            return new VentSourceProviderBuilder(this);
+            vent.SetWatermarkProvider(watermarkProvider);
+            return this;
         }
 
-        public Vent Build()
+        public VentSourceProviderBuilder AddSourceProvider(ISourceProvider sourceProvider)
         {
-            return vent;
+            vent.AddSourceProvider(sourceProvider);
+            return new VentSourceProviderBuilder(this, sourceProvider);
         }
 
         public VentTargetProviderBuilder AddTargetProvider(ITargetProvider targetProvider)
         {
             return new VentTargetProviderBuilder(this);
+        }
+
+        public IVent Build()
+        {
+            return vent;
         }
     }
 }

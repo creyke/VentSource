@@ -3,10 +3,12 @@
     public class VentSourceProviderBuilder
     {
         private readonly VentBuilder ventBuilder;
+        private readonly ISourceProvider sourceProvider;
 
-        public VentSourceProviderBuilder(VentBuilder ventBuilder)
+        public VentSourceProviderBuilder(VentBuilder ventBuilder, ISourceProvider sourceProvider)
         {
             this.ventBuilder = ventBuilder;
+            this.sourceProvider = sourceProvider;
         }
 
         public VentSourceProviderBuilder AddSource<TSourceType>()
